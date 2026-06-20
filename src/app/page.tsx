@@ -22,7 +22,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
-    }, 5000);
+    }, 8000);
     return () => clearInterval(interval);
   }, []);
 
