@@ -31,8 +31,8 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative w-full h-[95vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
         {/* Full screen background image placeholder */}
-        <div className="absolute inset-0 -z-10 bg-[#f9f6f0]">
-          <AnimatePresence mode="wait">
+        <div className="absolute inset-0 -z-10 bg-[#2c241b]">
+          <AnimatePresence>
             <motion.div
               key={currentImageIndex}
               initial={{ opacity: 0 }}
