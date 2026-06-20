@@ -1,28 +1,58 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { siteConfig } from "@/config/site-config";
 import { CalendarDays, MapPin } from "lucide-react";
 
+const HERO_IMAGES = [
+  "/images/hero-1.png",
+  "/images/hero-2.png",
+  "/images/hero-3.png",
+  "/images/hero-4.png",
+  "/images/hero-5.png",
+  "/images/hero-6.png",
+];
+
 export default function Home() {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative w-full h-[95vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
         {/* Full screen background image placeholder */}
-        <div className="absolute inset-0 -z-10">
-          <Image
-            src="/images/hero.png"
-            alt="Hero Background"
-            fill
-            className="object-cover opacity-80 mix-blend-multiply"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
+        <div className="absolute inset-0 -z-10 bg-[#f9f6f0]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={HERO_IMAGES[currentImageIndex]}
+                alt={`Hero Background ${currentImageIndex + 1}`}
+                fill
+                className="object-cover opacity-80 mix-blend-multiply"
+                priority
+              />
+            </motion.div>
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40 z-10" />
           {/* Subtle warm overlay to enhance champagne/terracotta feel */}
-          <div className="absolute inset-0 bg-[#f9f6f0]/10 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-[#f9f6f0]/10 mix-blend-overlay z-10" />
         </div>
 
         <motion.div
