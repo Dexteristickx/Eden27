@@ -50,9 +50,9 @@ export default function Home() {
               />
             </motion.div>
           </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/40 z-10" />
           {/* Subtle warm overlay to enhance champagne/terracotta feel */}
-          <div className="absolute inset-0 bg-[#f9f6f0]/10 mix-blend-overlay z-10" />
+          <div className="absolute inset-0 bg-[#f9f6f0]/5 mix-blend-overlay z-10" />
         </div>
 
         <motion.div
@@ -61,10 +61,10 @@ export default function Home() {
           transition={{ duration: 1.2, ease: "easeOut" }}
           className="z-10 mt-16"
         >
-          <p className="text-sm md:text-base tracking-[0.3em] uppercase text-foreground/80 mb-6 font-sans">
+          <p className="text-sm md:text-base tracking-[0.3em] uppercase text-[#f9f6f0]/90 mb-6 font-sans">
             You are warmly invited to
           </p>
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif text-foreground mb-8 leading-tight tracking-tight drop-shadow-sm">
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif text-[#f9f6f0] mb-8 leading-tight tracking-tight drop-shadow-xl">
             {siteConfig.coupleNames}
           </h1>
           
@@ -72,14 +72,14 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="flex flex-col md:flex-row items-center justify-center gap-6 mb-16 text-lg md:text-xl font-serif italic text-foreground/80"
+            className="flex flex-col md:flex-row items-center justify-center gap-6 mb-16 text-lg md:text-xl font-serif italic text-[#f9f6f0]"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 drop-shadow-md">
               <CalendarDays className="w-5 h-5 text-primary" />
               <span>{siteConfig.weddingDate}</span>
             </div>
-            <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-primary/60" />
-            <div className="flex items-center gap-3">
+            <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-primary" />
+            <div className="flex items-center gap-3 drop-shadow-md">
               <MapPin className="w-5 h-5 text-primary" />
               <span>{siteConfig.weddingLocation}</span>
             </div>
