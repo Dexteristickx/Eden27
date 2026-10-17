@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ShieldCheck, Lock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export default function AdminLogin() {
+function LoginForm() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +42,49 @@ export default function AdminLogin() {
   };
 
   return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="bg-red-100 text-red-700 text-sm p-3 rounded-xl mb-4">
+          {error}
+        </div>
+      )}
+
+      <div>
+        <label htmlFor="admin-pin" className="sr-only">
+          Organizer PIN
+        </label>
+        <input
+          id="admin-pin"
+          type="password"
+          inputMode="numeric"
+          maxLength={12}
+          value={pin}
+          onChange={(e) => setPin(e.target.value)}
+          placeholder="Enter PIN"
+          className="w-full bg-background border border-foreground/20 text-center text-2xl tracking-[0.5em] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary font-mono"
+          autoFocus
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading || !pin}
+        className="w-full bg-primary text-white font-medium py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+      >
+        {isLoading ? "Verifying..." : (
+          <>
+            <span>Access Dashboard</span>
+            <ArrowRight className="w-4 h-4" />
+          </>
+        )}
+      </button>
+    </form>
+  );
+}
+
+export default function AdminLogin() {
+  return (
     <div className="min-h-screen bg-background py-20 px-4 flex flex-col items-center justify-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -57,44 +100,9 @@ export default function AdminLogin() {
           Enter your organizer PIN to access the event management portal and door check-in.
         </p>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 text-sm p-3 rounded-xl mb-6">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="admin-pin" className="sr-only">
-              Organizer PIN
-            </label>
-            <input
-              id="admin-pin"
-              type="password"
-              inputMode="numeric"
-              maxLength={12}
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder="Enter PIN"
-              className="w-full bg-background border border-foreground/20 text-center text-2xl tracking-[0.5em] rounded-xl px-4 py-3.5 focus:outline-none focus:border-primary font-mono"
-              autoFocus
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading || !pin}
-            className="w-full bg-primary text-white font-medium py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isLoading ? "Verifying..." : (
-              <>
-                <span>Access Dashboard</span>
-                <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
+        <Suspense fallback={<div className="py-6 text-foreground/50 text-sm">Loading security gate...</div>}>
+          <LoginForm />
+        </Suspense>
 
         <div className="mt-8 pt-6 border-t border-foreground/10 flex justify-between items-center text-xs text-foreground/60">
           <Link href="/" className="hover:text-primary transition-colors">
