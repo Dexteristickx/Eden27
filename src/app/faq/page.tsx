@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { MessageCircle, Users } from "lucide-react";
 
 const faqs = [
   {
@@ -33,12 +34,40 @@ export default function FAQ() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4">Q&A</h1>
           <p className="text-lg text-foreground/80">
             Common questions about our wedding weekend.
           </p>
+        </motion.div>
+
+        {/* WhatsApp Community Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-[#25D366]/10 border border-[#25D366]/20 rounded-2xl p-6 mb-10 shadow-sm"
+        >
+          <div className="flex items-start gap-4">
+            <MessageCircle className="w-6 h-6 text-[#25D366] mt-0.5 shrink-0" />
+            <div>
+              <h3 className="font-serif text-lg text-foreground mb-1 font-semibold">
+                Join Our Wedding WhatsApp Community
+              </h3>
+              <p className="text-sm text-foreground/70 mb-3 leading-relaxed">
+                Get real-time updates, share excitement, and connect with fellow guests in our official EDEN27 WhatsApp community.
+              </p>
+              <a
+                href="https://chat.whatsapp.com/XXXXX"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#25D366] text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-[#20bd5a] transition-all shadow-md hover:scale-105"
+              >
+                <Users className="w-4 h-4" /> Join the Community
+              </a>
+            </div>
+          </div>
         </motion.div>
 
         <div className="space-y-6">

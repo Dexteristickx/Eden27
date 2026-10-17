@@ -27,18 +27,24 @@ A modern, luxury, mobile-responsive wedding invitation and event website for Olu
 - [x] P0 Security: Defined strict Row Level Security (RLS) policies in `supabase/schema.sql`
 - [x] P1 UX: Added `sessionStorage` caching to `AppShell.tsx` and a "Skip →" button in `SplashScreen.tsx`
 - [x] P1 UX/a11y: Fixed RSVP container width (`max-w-2xl`) and added accessible IDs and `htmlFor` label connections
-- [/] Ready to push changes or proceed to Nigerian Wedding Layer
-- [ ] Implement Nigerian Wedding Layer (WhatsApp button, countdown timer, Add to Calendar, bank transfer details)
+- [x] Nigerian Wedding Layer: Floating WhatsApp button with coordinator direct chat & group invite (`WhatsAppFloat.tsx`)
+- [x] Nigerian Wedding Layer: Dual ceremony countdown timer for Dec 30 (Traditional) and Dec 31 (Church) with WAT offset (`CountdownTimer.tsx`)
+- [x] Nigerian Wedding Layer: Add to Calendar integration (.ics download + Google Calendar links) on schedule cards (`AddToCalendar.tsx`)
+- [x] Nigerian Wedding Layer: Multi-currency Bank Transfer / Cash Gift cards with copy-to-clipboard on registry page (`BankTransferCard.tsx`)
+- [x] Nigerian Wedding Layer: WhatsApp community invite card on FAQ page
+- [/] Ready for Phase 3: Photo lightbox, Aso-Ebi order tracking, or OpenGraph sharing banner
+- [ ] Implement Phase 3 items
 
 ## Key Files & Recent Modifications
-- `src/middleware.ts`: Next.js middleware enforcing `eden27_admin_session` cookie for `/admin/*`
-- `src/app/admin/login/page.tsx`: Organizer PIN entry page with luxury glass-card design
-- `src/app/api/admin/login/route.ts` & `src/app/api/admin/logout/route.ts`: Secure cookie management
-- `src/app/admin/page.tsx` & `src/app/admin/checkin/page.tsx`: Header navigation, door check-in link, and logout
-- `supabase/schema.sql`: RLS policies blocking anonymous reads/mutations on `guests`, `vip_codes`, and `event_settings`
-- `src/components/AppShell.tsx`: Session-based splash screen display check
-- `src/components/SplashScreen.tsx`: Added `onSkip` button
-- `src/app/register/page.tsx` & `src/app/vip/page.tsx`: Full-width responsive container and accessible form controls
+- `src/components/WhatsAppFloat.tsx`: Floating action button with coordinator chat and WhatsApp community modal
+- `src/components/CountdownTimer.tsx`: Dual ceremony countdown timer with glass-morphic cards
+- `src/components/AddToCalendar.tsx`: Dropdown generating `.ics` files and Google Calendar links
+- `src/components/BankTransferCard.tsx`: Multi-currency account display with instant clipboard copy
+- `src/components/AppShell.tsx`: Mounted `WhatsAppFloat` delayed after splash
+- `src/app/page.tsx`: Integrated dual countdown timer below welcome section
+- `src/app/schedule/page.tsx`: Integrated `AddToCalendar` into Traditional, Church, and Reception cards
+- `src/app/registry/page.tsx`: Integrated `BankTransferCard` alongside store wishlist
+- `src/app/faq/page.tsx`: Added official WhatsApp community banner
 
 ## Next Immediate Action
-Commit and push P0 security & P1 quick win fixes to GitHub, then proceed to the Nigerian Wedding Layer (WhatsApp floating button, Countdown timer, Add to Calendar, and Bank transfer details).
+Review live functionality with the user, commit and push to GitHub (`Dexteristickx/Eden27`), and plan Phase 3 (OpenGraph preview image, photo lightbox, or Aso-Ebi tracker).

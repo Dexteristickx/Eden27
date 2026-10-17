@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { siteConfig } from "@/config/site-config";
 import { CalendarDays, MapPin } from "lucide-react";
+import CountdownTimer from "@/components/CountdownTimer";
 
 const HERO_IMAGES = [
   "/images/hero-1.png",
@@ -127,6 +128,32 @@ export default function Home() {
             Surrounded by the people who mean the most to us, we will exchange our vows and dance the night away. 
             Please use this website to RSVP, find event details, and read more about our special day.
           </motion.p>
+        </div>
+      </section>
+
+      {/* Countdown Section */}
+      <section className="py-12 px-4 bg-background border-t border-primary/10">
+        <div className="max-w-4xl mx-auto">
+          <CountdownTimer
+            targetDate="2026-12-30T10:00:00+01:00"
+            label="Traditional Wedding"
+            sublabel="December 30, 2026 · Lagos"
+            accentColor="#c48b71"
+          />
+
+          {/* Decorative divider */}
+          <div className="flex items-center justify-center gap-4 py-2">
+            <span className="h-px w-16 bg-foreground/15" />
+            <span className="text-primary text-lg">✦</span>
+            <span className="h-px w-16 bg-foreground/15" />
+          </div>
+
+          <CountdownTimer
+            targetDate="2026-12-31T11:00:00+01:00"
+            label="Church Wedding & Reception"
+            sublabel="December 31, 2026 · Lagos"
+            accentColor="#2c241b"
+          />
         </div>
       </section>
     </div>

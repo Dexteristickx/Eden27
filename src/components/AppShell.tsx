@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Navbar } from "@/components/Navbar";
 import { SplashScreen } from "@/components/SplashScreen";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [showSplash, setShowSplash] = useState(false);
@@ -38,6 +39,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         <Navbar />
         <main className="flex-grow pt-16">{children}</main>
+        <WhatsAppFloat
+          coordinatorPhone="2348012345678"
+          groupInviteLink="https://chat.whatsapp.com/XXXXX"
+          coupleNames="Oluwadunsin & Ololade"
+        />
       </div>
     </>
   );
