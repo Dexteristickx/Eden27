@@ -102,10 +102,10 @@ export default function Register() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="glass-card rounded-3xl p-8 shadow-xl max-w-md w-full text-center"
+          className="glass-card rounded-3xl p-8 md:p-10 shadow-xl w-full text-left"
         >
           {errorMsg && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-r-lg" role="alert">
               <p>{errorMsg}</p>
             </div>
           )}
@@ -113,30 +113,68 @@ export default function Register() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Full Name *</label>
-                <input {...register("fullName")} className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+                <label htmlFor="fullName" className="block text-sm font-medium text-foreground mb-2">
+                  Full Name *
+                </label>
+                <input 
+                  id="fullName"
+                  {...register("fullName")} 
+                  placeholder="e.g. Oluwaseun Adeleke"
+                  className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+                />
                 {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
-                <input {...register("phone")} className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+                <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
+                  Phone Number *
+                </label>
+                <input 
+                  id="phone"
+                  type="tel"
+                  {...register("phone")} 
+                  placeholder="e.g. +234 801 234 5678"
+                  className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+                />
                 {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Email Address (Optional)</label>
-              <input type="email" {...register("email")} className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                Email Address <span className="text-foreground/50 text-xs font-normal">(for E-Ticket delivery)</span>
+              </label>
+              <input 
+                id="email"
+                type="email" 
+                {...register("email")} 
+                placeholder="e.g. seun@example.com"
+                className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+              />
               {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-3">Events Attending *</label>
-              <div className="space-y-3">
-                {["Traditional Wedding", "Church & Reception"].map((evt) => (
-                  <label key={evt} className="flex items-center gap-3">
-                    <input type="checkbox" value={evt} {...register("eventsAttending")} className="w-5 h-5 text-primary focus:ring-primary border-foreground/20 rounded" />
-                    <span className="text-foreground">{evt}</span>
+              <span className="block text-sm font-medium text-foreground mb-3">
+                Events Attending *
+              </span>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {[
+                  { id: "evt-trad", label: "Traditional Wedding (Dec 30)" },
+                  { id: "evt-church", label: "Church & Reception (Dec 31)" }
+                ].map((evt) => (
+                  <label 
+                    key={evt.id} 
+                    htmlFor={evt.id}
+                    className="flex items-center gap-3 p-3.5 rounded-xl border border-foreground/10 bg-background/50 hover:bg-background cursor-pointer transition-colors"
+                  >
+                    <input 
+                      id={evt.id}
+                      type="checkbox" 
+                      value={evt.label} 
+                      {...register("eventsAttending")} 
+                      className="w-5 h-5 accent-primary text-primary focus:ring-primary rounded" 
+                    />
+                    <span className="text-foreground text-sm font-medium">{evt.label}</span>
                   </label>
                 ))}
               </div>
@@ -145,32 +183,56 @@ export default function Register() {
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-foreground">Plus Ones</label>
-                <button type="button" onClick={() => append({ name: "" })} className="text-primary text-sm font-medium">
+                <label className="block text-sm font-medium text-foreground">Plus Ones (Up to 3)</label>
+                <button 
+                  type="button" 
+                  onClick={() => append({ name: "" })} 
+                  className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+                >
                   + Add Guest
                 </button>
               </div>
               <div className="space-y-3">
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex gap-3">
-                    <input {...register(`plusOnes.${index}.name`)} placeholder="Guest Full Name" className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-2 focus:outline-none focus:border-primary" />
-                    <button type="button" onClick={() => remove(index)} className="text-red-500 text-sm font-medium px-2">Remove</button>
+                    <input 
+                      id={`plusOne-${index}`}
+                      aria-label={`Plus one guest ${index + 1} full name`}
+                      {...register(`plusOnes.${index}.name`)} 
+                      placeholder={`Guest ${index + 1} Full Name`} 
+                      className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-2.5 focus:outline-none focus:border-primary text-foreground" 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => remove(index)} 
+                      className="text-red-500 hover:text-red-700 text-sm font-medium px-3 border border-red-200 rounded-lg transition-colors"
+                    >
+                      Remove
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Dietary Requirements / Note</label>
-              <textarea {...register("dietaryNote")} rows={3} className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+              <label htmlFor="dietaryNote" className="block text-sm font-medium text-foreground mb-2">
+                Dietary Requirements / Special Wishes
+              </label>
+              <textarea 
+                id="dietaryNote"
+                {...register("dietaryNote")} 
+                placeholder="Any allergies, dietary preferences, or a sweet message for the couple..."
+                rows={3} 
+                className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground resize-none" 
+              />
             </div>
 
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full bg-primary text-white font-medium text-lg py-4 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="w-full bg-primary text-white font-medium text-lg py-4 rounded-xl hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 cursor-pointer"
             >
-              {isSubmitting ? "Processing..." : "Complete Registration"}
+              {isSubmitting ? "Generating Your E-Ticket..." : "Complete Registration"}
             </button>
           </form>
         </motion.div>

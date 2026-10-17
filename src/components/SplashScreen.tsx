@@ -5,9 +5,10 @@ import { useState, useEffect } from "react";
 
 interface SplashScreenProps {
   onComplete: () => void;
+  onSkip?: () => void;
 }
 
-export function SplashScreen({ onComplete }: SplashScreenProps) {
+export function SplashScreen({ onComplete, onSkip }: SplashScreenProps) {
   const [phase, setPhase] = useState<"enter" | "hold" | "exit">("enter");
 
   useEffect(() => {
@@ -40,6 +41,17 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         className="fixed inset-0 z-[9999] flex flex-col items-center justify-center overflow-hidden"
         style={{ backgroundColor: "#f9f6f0" }}
       >
+        {/* Skip button */}
+        {onSkip && (
+          <button
+            onClick={onSkip}
+            className="absolute top-6 right-6 z-50 text-xs uppercase tracking-[0.2em] font-sans px-3.5 py-1.5 rounded-full border border-[#c48b71]/40 text-[#2c241b]/70 hover:text-[#c48b71] hover:border-[#c48b71] transition-all cursor-pointer"
+            aria-label="Skip introductory animation"
+          >
+            Skip →
+          </button>
+        )}
+
         {/* Subtle radial glow behind the monogram */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}

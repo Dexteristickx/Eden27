@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Users, CheckCircle, Ticket, Download, Settings } from "lucide-react";
+import { Users, CheckCircle, Ticket, Download, Settings, LogOut, QrCode } from "lucide-react";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -12,9 +14,14 @@ export default function AdminDashboard() {
   });
   const [guests, setGuests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  // In a real app, this page would be protected by Supabase Auth middleware.
-  
+  const handleLogout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
+    router.push("/admin/login");
+    router.refresh();
+  };
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -79,14 +86,32 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-serif text-foreground">Admin Dashboard</h1>
-          <button 
-            onClick={exportCSV}
-            className="flex items-center gap-2 bg-foreground text-background px-4 py-2 rounded-lg hover:bg-foreground/90 transition-colors"
-          >
-            <Download className="w-4 h-4" /> Export CSV
-          </button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+          <div>
+            <h1 className="text-3xl font-serif text-foreground">Admin Dashboard</h1>
+            <p className="text-sm text-foreground/60">Guest management and attendance overview</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/checkin"
+              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+            >
+              <QrCode className="w-4 h-4" /> Door Check-In
+            </Link>
+            <button 
+              onClick={exportCSV}
+              className="flex items-center gap-2 bg-foreground text-background px-4 py-2 rounded-lg hover:bg-foreground/90 transition-colors text-sm"
+            >
+              <Download className="w-4 h-4" /> Export CSV
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 border border-foreground/20 text-foreground/80 hover:text-red-600 hover:border-red-300 px-3 py-2 rounded-lg transition-colors text-sm"
+              title="Log out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}

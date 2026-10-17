@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { Search, QrCode, CheckCircle, XCircle } from "lucide-react";
+import { Search, QrCode, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function CheckIn() {
@@ -60,6 +61,15 @@ export default function CheckIn() {
   return (
     <div className="min-h-screen bg-background py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-2 text-sm text-foreground/70 hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Admin Dashboard
+          </Link>
+        </div>
+
         <div className="text-center mb-10">
           <QrCode className="w-12 h-12 text-primary mx-auto mb-4" />
           <h1 className="text-3xl font-serif text-foreground">Guest Check-In</h1>

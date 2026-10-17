@@ -109,3 +109,44 @@ begin
   );
 end;
 $$ language plpgsql security definer;
+
+-- -------------------------------------------------------------
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- -------------------------------------------------------------
+
+-- 1. GUESTS TABLE
+alter table guests enable row level security;
+
+-- Block public anonymous reads (prevents downloading full guest list via anon key)
+create policy "Block anon select on guests" on guests
+  for select using (false);
+
+-- Direct client inserts blocked; all inserts must go through register_guest RPC (security definer)
+create policy "Block anon insert on guests" on guests
+  for insert with check (false);
+
+create policy "Block anon update on guests" on guests
+  for update using (false);
+
+create policy "Block anon delete on guests" on guests
+  for delete using (false);
+
+-- 2. VIP CODES TABLE
+alter table vip_codes enable row level security;
+
+-- Allow reading active VIP codes for verification
+create policy "Allow select on active vip codes" on vip_codes
+  for select using (true);
+
+create policy "Block anon mutation on vip_codes" on vip_codes
+  for insert with check (false);
+
+-- 3. EVENT SETTINGS TABLE
+alter table event_settings enable row level security;
+
+create policy "Allow public read on event_settings" on event_settings
+  for select using (true);
+
+create policy "Block anon mutation on event_settings" on event_settings
+  for insert with check (false);
+

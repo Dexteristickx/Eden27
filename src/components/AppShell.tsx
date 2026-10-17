@@ -1,22 +1,38 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Navbar } from "@/components/Navbar";
 import { SplashScreen } from "@/components/SplashScreen";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Only show splash once per session
+    const hasSeen = sessionStorage.getItem("eden27_splash_seen");
+    if (!hasSeen) {
+      setShowSplash(true);
+    }
+    setMounted(true);
+  }, []);
 
   const handleSplashComplete = useCallback(() => {
+    sessionStorage.setItem("eden27_splash_seen", "true");
     setShowSplash(false);
   }, []);
 
   return (
     <>
-      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+      {mounted && showSplash && (
+        <SplashScreen 
+          onComplete={handleSplashComplete} 
+          onSkip={handleSplashComplete}
+        />
+      )}
       <div
         style={{
-          opacity: showSplash ? 0 : 1,
+          opacity: mounted && showSplash ? 0 : 1,
           transition: "opacity 0.5s ease-in-out",
         }}
       >

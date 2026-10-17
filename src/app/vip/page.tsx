@@ -198,30 +198,66 @@ export default function VIPRegistration() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Full Name *</label>
-                <input {...register("fullName")} className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+                <label htmlFor="vip-fullName" className="block text-sm font-medium text-foreground mb-2">
+                  Full Name *
+                </label>
+                <input 
+                  id="vip-fullName"
+                  {...register("fullName")} 
+                  className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+                />
                 {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Phone Number *</label>
-                <input {...register("phone")} className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+                <label htmlFor="vip-phone" className="block text-sm font-medium text-foreground mb-2">
+                  Phone Number *
+                </label>
+                <input 
+                  id="vip-phone"
+                  type="tel"
+                  {...register("phone")} 
+                  className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+                />
                 {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
-              <input type="email" {...register("email")} className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+              <label htmlFor="vip-email" className="block text-sm font-medium text-foreground mb-2">
+                Email Address <span className="text-foreground/50 text-xs font-normal">(for VIP E-Ticket delivery)</span>
+              </label>
+              <input 
+                id="vip-email"
+                type="email" 
+                {...register("email")} 
+                className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+              />
               {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-3">Events Attending *</label>
+              <span className="block text-sm font-medium text-foreground mb-3">
+                Events Attending *
+              </span>
               <div className="space-y-3">
-                {["Private Pre-Wedding Gathering (VIP)", "Traditional Wedding", "Church & Reception"].map((evt) => (
-                  <label key={evt} className="flex items-center gap-3">
-                    <input type="checkbox" value={evt} {...register("eventsAttending")} className="w-5 h-5 text-primary focus:ring-primary border-foreground/20 rounded" />
-                    <span className="text-foreground font-medium">{evt}</span>
+                {[
+                  { id: "vip-pre", label: "Private Pre-Wedding Gathering (VIP)" },
+                  { id: "vip-trad", label: "Traditional Wedding" },
+                  { id: "vip-church", label: "Church & Reception" }
+                ].map((evt) => (
+                  <label 
+                    key={evt.id} 
+                    htmlFor={evt.id}
+                    className="flex items-center gap-3 p-3.5 rounded-xl border border-primary/20 bg-background/50 hover:bg-background cursor-pointer transition-colors"
+                  >
+                    <input 
+                      id={evt.id}
+                      type="checkbox" 
+                      value={evt.label} 
+                      {...register("eventsAttending")} 
+                      className="w-5 h-5 accent-primary text-primary focus:ring-primary rounded" 
+                    />
+                    <span className="text-foreground font-medium">{evt.label}</span>
                   </label>
                 ))}
               </div>
@@ -231,31 +267,54 @@ export default function VIPRegistration() {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <label className="block text-sm font-medium text-foreground">VIP Plus Ones</label>
-                <button type="button" onClick={() => append({ name: "" })} className="text-primary text-sm font-medium">
+                <button 
+                  type="button" 
+                  onClick={() => append({ name: "" })} 
+                  className="text-primary hover:text-primary/80 text-sm font-medium"
+                >
                   + Add Guest
                 </button>
               </div>
               <div className="space-y-3">
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex gap-3">
-                    <input {...register(`plusOnes.${index}.name`)} placeholder="Guest Full Name" className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-2 focus:outline-none focus:border-primary" />
-                    <button type="button" onClick={() => remove(index)} className="text-red-500 text-sm font-medium px-2">Remove</button>
+                    <input 
+                      id={`vipPlusOne-${index}`}
+                      aria-label={`VIP Plus One ${index + 1} Full Name`}
+                      {...register(`plusOnes.${index}.name`)} 
+                      placeholder="Guest Full Name" 
+                      className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-2 focus:outline-none focus:border-primary text-foreground" 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => remove(index)} 
+                      className="text-red-500 text-sm font-medium px-2"
+                    >
+                      Remove
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Dietary Requirements / VIP Preferences</label>
-              <textarea {...register("dietaryNote")} rows={3} className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary" />
+              <label htmlFor="vip-dietaryNote" className="block text-sm font-medium text-foreground mb-2">
+                Dietary Requirements / VIP Preferences
+              </label>
+              <textarea 
+                id="vip-dietaryNote"
+                {...register("dietaryNote")} 
+                rows={3} 
+                className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground resize-none" 
+              />
             </div>
 
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full bg-primary text-white font-medium text-lg py-4 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="w-full bg-primary text-white font-medium text-lg py-4 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer shadow-lg"
             >
-              {isSubmitting ? "Processing..." : "Complete VIP Registration"}
+              {isSubmitting ? "Processing VIP Registration..." : "Complete VIP Registration"}
             </button>
           </form>
         </motion.div>
