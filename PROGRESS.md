@@ -55,6 +55,7 @@ A modern, luxury, mobile-responsive wedding invitation and event website for Olu
   - Built Branded Luxury Reception E-Ticket Card generator (`src/components/TicketCardDownload.tsx`) on `/register` and `/vip`
   - Upgraded `/admin` (showing `X / 300` Reception Seats Allocated) and `/admin/checkin` (adding Live Camera QR Scanner + instant check-in sync)
   - Created `google-sheets-webhook.gs` script for 1-minute Google Sheet & automatic Gmail E-Ticket integration
+- [x] Connected live `GOOGLE_SHEET_WEBHOOK_URL` on local and production VPS (`.env.local`), restarted PM2 (`eden27 --update-env`), and verified `200 {"success":true}` live row insertion into Google Sheet
 
 ## Key Files & Recent Modifications
 - `src/app/api/admin/guests/route.ts`: Protected server-side endpoint for Admin guest listing

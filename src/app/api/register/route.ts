@@ -97,7 +97,7 @@ export async function POST(request: Request) {
         remainingSeats: maxSeats - totalSeatsAllocated,
         maxSeats,
         fullName: guest.full_name,
-        phone: guest.phone,
+        phone: guest.phone.startsWith('+') ? `'${guest.phone}` : guest.phone,
         email: guest.email,
         guestType: guest.guest_type.toUpperCase(),
         eventsAttending: guest.events_attending.join(', '),
