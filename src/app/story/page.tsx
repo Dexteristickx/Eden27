@@ -13,7 +13,7 @@ const timelineEvents = [
     tag: "Chapter I",
     title: "How We Met",
     description:
-      "We crossed paths in Lagos, where what began as an effortless conversation quickly turned into hours of laughter and talking about everything under the sun. From the very first day, there was an undeniable warmth and familiarity between us.",
+      "We crossed paths in Ibadan, where what began as an effortless conversation quickly turned into hours of laughter and talking about everything under the sun. From the very first day, there was an undeniable warmth and familiarity between us.",
     image: "/images/proposal/walking-in-bw.webp",
     caption: "Hand in hand, walking into forever",
   },

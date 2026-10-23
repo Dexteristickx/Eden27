@@ -38,6 +38,7 @@ A modern, luxury, mobile-responsive wedding invitation and event website for Olu
 - [x] VPS Nginx: Configured reverse proxy `/etc/nginx/sites-available/eden27.com.conf` with gzip, caching, and SSL fallback
 - [x] VPS Connectivity Test: Confirmed `HTTP/1.1 200 OK` from external requests to `145.239.78.148` for `eden27.com`
 - [x] Cloudflare DNS: Successfully pointing `eden27.com` and `www.eden27.com` to VPS IP `145.239.78.148` with active Cloudflare edge SSL
+- [x] VPS Let's Encrypt SSL & HTTP→HTTPS Redirect: Issued trusted Certbot SSL certificate (`/etc/letsencrypt/live/eden27.com/`) and enabled automatic `301 Moved Permanently` redirect from `http://eden27.com` to `https://eden27.com` for mobile and desktop browsers
 - [x] Phase 3 Polish:
   - Interactive photo lightbox in `src/app/gallery/page.tsx` using `hero-1.png`..`hero-6.png` with keyboard & arrow navigation
   - Synced event schedule times across `site-config.ts`, `page.tsx`, and `schedule/page.tsx`
@@ -48,6 +49,12 @@ A modern, luxury, mobile-responsive wedding invitation and event website for Olu
   - Curated 14 couple-only & proposal-detail portraits from the 99 raw photos (excluding crowd/group shots) and converted to WebP (`public/images/proposal/`)
   - Trimmed & transcoded the 140.84 MB `.MOV` proposal video into a 79s upright couple-only highlight film (`public/videos/proposal-film.mp4`) and 16s silent loop (`public/videos/proposal-teaser.mp4`)
   - Built the Proposal Cinema Showcase + alternating photo chapters on `/story`, categorized masonry gallery + film modal on `/gallery`, and Proposal Showcase section on `/`
+- [x] Phase 5 Ibadan Location Update, 300-Seat Reception Engine, Google Sheets Webhook & Branded E-Ticket Pass:
+  - Updated location from Lagos to Ibadan, Oyo State across `site-config.ts`, `page.tsx`, `layout.tsx`, `story/page.tsx`, and `/travel` (with interactive Ibadan Google Map + Ibadan Airport & Lagos–Ibadan NRC Train guide)
+  - Implemented 300-guest Reception Seat Allocation engine (`src/lib/guest-store.ts`) with persistent VPS storage (`data/guests.json`), Supabase fallback, and automatic Google Sheets Webhook (`GOOGLE_SHEET_WEBHOOK_URL`) + Gmail/Resend email trigger
+  - Built Branded Luxury Reception E-Ticket Card generator (`src/components/TicketCardDownload.tsx`) on `/register` and `/vip`
+  - Upgraded `/admin` (showing `X / 300` Reception Seats Allocated) and `/admin/checkin` (adding Live Camera QR Scanner + instant check-in sync)
+  - Created `google-sheets-webhook.gs` script for 1-minute Google Sheet & automatic Gmail E-Ticket integration
 
 ## Key Files & Recent Modifications
 - `src/app/api/admin/guests/route.ts`: Protected server-side endpoint for Admin guest listing

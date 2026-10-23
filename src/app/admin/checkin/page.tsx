@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Search, QrCode, CheckCircle, ArrowLeft } from "lucide-react";
+import { Search, QrCode, CheckCircle, ArrowLeft, Camera, X } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function CheckIn() {
@@ -10,20 +10,38 @@ export default function CheckIn() {
   const [searchResult, setSearchResult] = useState<any | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    setIsCameraOpen(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+      }
+    };
+  }, []);
+
+  const lookupGuest = async (rawInput: string) => {
     setErrorMsg("");
     setSearchResult(null);
     setIsProcessing(true);
 
     try {
-      // Allow pasting raw QR JSON payload or entering Seat No / Name
-      let queryToSearch = searchQuery.trim();
+      let queryToSearch = rawInput.trim();
       if (queryToSearch.startsWith("{")) {
         try {
           const parsed = JSON.parse(queryToSearch);
-          if (parsed.seat) queryToSearch = parsed.seat;
+          if (parsed.id) queryToSearch = parsed.id;
+          else if (parsed.seat) queryToSearch = parsed.seat;
           else if (parsed.name) queryToSearch = parsed.name;
         } catch {
           // Use raw string
@@ -44,6 +62,57 @@ export default function CheckIn() {
       setErrorMsg(err.message);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await lookupGuest(searchQuery);
+  };
+
+  const startCameraScan = async () => {
+    setErrorMsg("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+      streamRef.current = stream;
+      setIsCameraOpen(true);
+
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+        }
+      }, 100);
+
+      // Use native BarcodeDetector if supported on mobile Chrome/Safari
+      if ("BarcodeDetector" in window) {
+        const Detector = (window as any).BarcodeDetector;
+        const detector = new Detector({ formats: ["qr_code"] });
+        const scanInterval = setInterval(async () => {
+          if (!videoRef.current || !streamRef.current) {
+            clearInterval(scanInterval);
+            return;
+          }
+          try {
+            const barcodes = await detector.detect(videoRef.current);
+            if (barcodes && barcodes.length > 0) {
+              const rawValue = barcodes[0].rawValue;
+              clearInterval(scanInterval);
+              stopCamera();
+              setSearchQuery(rawValue);
+              await lookupGuest(rawValue);
+            }
+          } catch {
+            // Continue scanning
+          }
+        }, 400);
+      }
+    } catch {
+      setErrorMsg(
+        "Could not access camera. Please allow camera permissions or search by Seat Number / Name below."
+      );
     }
   };
 
@@ -86,75 +155,133 @@ export default function CheckIn() {
 
         <div className="text-center mb-10">
           <QrCode className="w-12 h-12 text-primary mx-auto mb-4" />
-          <h1 className="text-3xl font-serif text-foreground">Guest Check-In</h1>
-          <p className="text-foreground/80">Scan QR or manually search by seat number / name.</p>
+          <h1 className="text-3xl font-serif text-foreground">
+            Reception Door Check-In
+          </h1>
+          <p className="text-foreground/80">
+            Scan guest QR pass with your camera or search by Seat No. (e.g. R-001) / Name.
+          </p>
         </div>
 
-        <div className="bg-white/50 dark:bg-black/20 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-foreground/10 mb-8">
-          <form onSubmit={handleSearch} className="flex gap-4">
-            <input 
-              type="text" 
+        {/* Camera QR Scanner Toggle */}
+        <div className="mb-6 flex justify-center">
+          {!isCameraOpen ? (
+            <button
+              type="button"
+              onClick={startCameraScan}
+              className="inline-flex items-center gap-2.5 bg-primary text-white px-6 py-3.5 rounded-full font-medium shadow-md hover:bg-primary/90 transition-colors cursor-pointer"
+            >
+              <Camera className="w-5 h-5" />
+              <span>Scan QR Pass with Phone Camera</span>
+            </button>
+          ) : (
+            <div className="w-full glass-card rounded-2xl p-4 border border-primary/30 text-center">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-xs uppercase tracking-widest text-primary font-semibold">
+                  Point Camera at Guest QR Code
+                </span>
+                <button
+                  type="button"
+                  onClick={stopCamera}
+                  className="p-1.5 rounded-full bg-foreground/10 text-foreground hover:bg-foreground/20 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <video
+                ref={videoRef}
+                playsInline
+                muted
+                className="w-full max-h-[300px] object-cover rounded-xl bg-black"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white/60 backdrop-blur-md rounded-2xl p-6 shadow-sm border border-foreground/10 mb-8">
+          <form onSubmit={handleSearch} className="flex gap-3">
+            <input
+              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Seat No. (e.g. A-001), Name, or scanned QR data"
+              placeholder="Seat No. (e.g. R-001 or VIP-001), Name, or Phone"
               className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary"
             />
-            <button 
+            <button
               type="submit"
               disabled={isProcessing || !searchQuery}
-              className="bg-foreground text-background px-6 py-3 rounded-lg hover:bg-foreground/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="bg-foreground text-background px-6 py-3 rounded-lg hover:bg-foreground/90 transition-colors disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
               <Search className="w-5 h-5" /> Search
             </button>
           </form>
-          {errorMsg && <p className="text-red-500 text-sm mt-4 text-center">{errorMsg}</p>}
+          {errorMsg && (
+            <p className="text-red-500 text-sm mt-4 text-center">{errorMsg}</p>
+          )}
         </div>
 
         {searchResult && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className={`rounded-2xl p-8 border-2 shadow-xl ${
-              searchResult.checked_in 
-                ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800" 
-                : "bg-white dark:bg-black/40 border-primary/20"
+              searchResult.checked_in
+                ? "bg-green-50 border-green-200"
+                : "bg-white border-primary/20"
             }`}
           >
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h2 className="text-2xl font-serif font-medium text-foreground">{searchResult.full_name}</h2>
+                <h2 className="text-2xl font-serif font-medium text-foreground">
+                  {searchResult.full_name}
+                </h2>
                 <p className="text-foreground/60">{searchResult.phone}</p>
+                {searchResult.email && (
+                  <p className="text-xs text-foreground/50">
+                    {searchResult.email}
+                  </p>
+                )}
               </div>
               <div className="text-right">
-                <p className="text-sm uppercase tracking-wider text-foreground/60 mb-1">Seat</p>
-                <p className="text-3xl font-mono text-primary font-bold">{searchResult.seat_number}</p>
+                <p className="text-xs uppercase tracking-wider text-foreground/60 mb-1">
+                  Reception Seat
+                </p>
+                <p className="text-3xl font-mono text-primary font-bold">
+                  {searchResult.seat_number}
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-8 text-sm">
               <div className="bg-background/50 p-3 rounded-lg border border-foreground/5">
-                <p className="text-foreground/60 mb-1">Tier</p>
-                <p className="font-medium uppercase">{searchResult.guest_type}</p>
+                <p className="text-foreground/60 mb-1">Guest Tier</p>
+                <p className="font-medium uppercase">
+                  {searchResult.guest_type}
+                </p>
               </div>
               <div className="bg-background/50 p-3 rounded-lg border border-foreground/5">
-                <p className="text-foreground/60 mb-1">Plus Ones</p>
-                <p className="font-medium">{searchResult.plus_ones?.length || 0}</p>
+                <p className="text-foreground/60 mb-1">Total Party Seats</p>
+                <p className="font-medium">
+                  {searchResult.seat_count || 1} Seat(s)
+                </p>
               </div>
             </div>
 
             {searchResult.checked_in ? (
-              <div className="flex items-center justify-center gap-3 text-green-600 bg-green-100 p-4 rounded-xl">
+              <div className="flex items-center justify-center gap-3 text-green-700 bg-green-100 p-4 rounded-xl">
                 <CheckCircle className="w-6 h-6" />
-                <span className="font-medium text-lg">Already Checked In</span>
+                <span className="font-medium text-lg">
+                  Checked In at Reception
+                </span>
               </div>
             ) : (
-              <button 
+              <button
                 onClick={handleCheckIn}
                 disabled={isProcessing}
-                className="w-full bg-primary text-white py-4 rounded-xl text-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 shadow-lg flex items-center justify-center gap-3"
+                className="w-full bg-primary text-white py-4 rounded-xl text-lg font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 shadow-lg flex items-center justify-center gap-3 cursor-pointer"
               >
                 <CheckCircle className="w-6 h-6" />
-                Check In Guest
+                Confirm Reception Check-In
               </button>
             )}
           </motion.div>

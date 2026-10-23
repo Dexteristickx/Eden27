@@ -1,12 +1,12 @@
 export type Theme = 'classic' | 'modern' | 'floral';
 
 export const siteConfig = {
-  // These will be overridden by Supabase event_settings, but we provide defaults
   coupleNames: "Oluwadunsin & Ololade",
   weddingDate: "December 31, 2026",
-  weddingLocation: "Lagos, Nigeria",
+  weddingLocation: "Ibadan, Nigeria",
+  receptionSeatCapacity: 300,
   theme: "classic" as Theme,
-  
+
   // Events
   events: [
     {
@@ -14,27 +14,27 @@ export const siteConfig = {
       name: "Traditional Wedding",
       date: "2026-12-30",
       time: "1:00 PM",
-      venue: "Placeholder Traditional Venue",
-      address: "123 Traditional St, Lagos",
-      dressCode: "Aso-Ebi (Emerald Green & Gold)"
+      venue: "Traditional Engagement Venue",
+      address: "Ibadan, Oyo State, Nigeria",
+      dressCode: "Aso-Ebi (Emerald Green & Champagne Gold)"
     },
     {
       id: "church",
       name: "Church Wedding",
       date: "2026-12-31",
       time: "10:00 AM",
-      venue: "Placeholder Church",
-      address: "456 Holy Way, Lagos",
+      venue: "Holy Matrimony Church Venue",
+      address: "Ibadan, Oyo State, Nigeria",
       dressCode: "Formal / Suits & Gowns"
     },
     {
       id: "reception",
-      name: "Reception",
+      name: "Wedding Reception",
       date: "2026-12-31",
       time: "2:00 PM",
-      venue: "Placeholder Event Centre",
-      address: "789 Party Blvd, Lagos",
-      dressCode: "Formal / Reception Wear"
+      venue: "Grand Reception Hall (Seated by Allocated Pass)",
+      address: "Ibadan, Oyo State, Nigeria",
+      dressCode: "Formal / Reception Elegance"
     }
   ],
 

@@ -7,14 +7,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Image from "next/image";
 import { Lock, Unlock } from "lucide-react";
+import TicketCardDownload from "@/components/TicketCardDownload";
 
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
   phone: z.string().min(10, "Valid phone number is required"),
-  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+  email: z.string().email("Please enter a valid email address for your VIP E-Ticket"),
   eventsAttending: z.array(z.string()).min(1, "Please select at least one event"),
   plusOnes: z.array(z.object({ name: z.string() })).max(3, "Max 3 plus ones"),
-  dietaryNote: z.string().optional()
+  dietaryNote: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -27,17 +28,27 @@ export default function VIPRegistration() {
   const [isVerifying, setIsVerifying] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successData, setSuccessData] = useState<{ seatNumber: string, qrCode: string } | null>(null);
+  const [successData, setSuccessData] = useState<{
+    fullName: string;
+    seatNumber: string;
+    seatCount: number;
+    qrCode: string;
+  } | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const { register, control, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { eventsAttending: [], plusOnes: [] }
+    defaultValues: { eventsAttending: [], plusOnes: [] },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "plusOnes"
+    name: "plusOnes",
   });
 
   const handleVerify = async (e: React.FormEvent) => {
@@ -49,12 +60,12 @@ export default function VIPRegistration() {
       const res = await fetch("/api/verify-vip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: vipCode })
+        body: JSON.stringify({ code: vipCode }),
       });
       const data = await res.json();
-      
+
       if (!res.ok) throw new Error(data.error);
-      
+
       setIsVerified(true);
       setVipLabel(data.label);
     } catch (err: any) {
@@ -67,21 +78,26 @@ export default function VIPRegistration() {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     setErrorMsg("");
-    
+
     try {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, guestType: "vip", vipCode })
+        body: JSON.stringify({ ...data, guestType: "vip", vipCode }),
       });
-      
+
       const result = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(result.error || "Failed to register");
       }
-      
-      setSuccessData({ seatNumber: result.seatNumber, qrCode: result.qrCode });
+
+      setSuccessData({
+        fullName: result.fullName || data.fullName,
+        seatNumber: result.seatNumber,
+        seatCount: result.seatCount || 1,
+        qrCode: result.qrCode,
+      });
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
@@ -92,37 +108,60 @@ export default function VIPRegistration() {
   if (successData) {
     return (
       <div className="min-h-screen bg-background py-20 px-4 flex flex-col items-center justify-center">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass-card rounded-3xl p-8 md:p-12 shadow-xl border border-primary/20 max-w-md w-full text-center relative overflow-hidden"
+          className="glass-card rounded-3xl p-8 md:p-12 shadow-xl border border-primary/20 max-w-lg w-full text-center relative overflow-hidden"
         >
           <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary/50 to-primary" />
-          <div className="w-20 h-20 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">✓</div>
-          <h2 className="text-3xl font-serif text-foreground mb-4">VIP Registration Complete!</h2>
-          
-          <div className="bg-background rounded-xl p-6 mb-6">
-            <p className="text-sm uppercase tracking-wider text-foreground/60 mb-2">Your VIP Seat Number</p>
-            <p className="text-5xl font-serif text-primary">{successData.seatNumber}</p>
+          <div className="w-20 h-20 bg-primary/20 text-primary rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+            ✓
           </div>
-          
+          <h2 className="text-3xl font-serif text-foreground mb-2">
+            VIP Seat Confirmed!
+          </h2>
+          <p className="text-sm text-foreground/75 mb-6">
+            Your VIP Reception Seat Pass has also been sent to your email.
+          </p>
+
+          <div className="bg-background rounded-2xl p-6 mb-6 border border-primary/20">
+            <p className="text-xs uppercase tracking-[0.2em] text-foreground/60 mb-2">
+              Your VIP Reception Seat Number
+            </p>
+            <p className="text-5xl font-serif text-primary font-bold">
+              {successData.seatNumber}
+            </p>
+            <p className="text-xs text-foreground/60 mt-2">
+              {successData.seatCount} VIP Seat(s) Reserved · Ibadan, Oyo State
+            </p>
+          </div>
+
           {successData.qrCode && (
             <div className="mt-6 flex justify-center">
-              <Image src={successData.qrCode} alt="VIP E-Ticket QR Code" width={200} height={200} className="rounded-lg shadow-sm border-2 border-primary/20" />
+              <Image
+                src={successData.qrCode}
+                alt="VIP E-Ticket QR Code"
+                width={200}
+                height={200}
+                className="rounded-lg shadow-sm border-2 border-primary/20"
+              />
             </div>
           )}
+
           {successData.qrCode && (
-            <div className="mt-4 flex justify-center">
-              <a
-                href={successData.qrCode}
-                download={`EDEN27-VIP-Ticket-${successData.seatNumber}.png`}
-                className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-primary/90 transition-colors shadow-md"
-              >
-                Download VIP E-Ticket QR
-              </a>
+            <div className="mt-6 flex justify-center">
+              <TicketCardDownload
+                fullName={successData.fullName}
+                seatNumber={successData.seatNumber}
+                seatCount={successData.seatCount}
+                guestType="vip"
+                qrCodeDataUrl={successData.qrCode}
+              />
             </div>
           )}
-          <p className="text-sm text-foreground/60 mt-4">This is your exclusive VIP access pass.</p>
+          <p className="text-xs text-foreground/60 mt-4">
+            This is your exclusive VIP reception access pass.
+          </p>
         </motion.div>
       </div>
     );
@@ -131,15 +170,19 @@ export default function VIPRegistration() {
   if (!isVerified) {
     return (
       <div className="min-h-screen bg-background py-20 px-4 flex flex-col items-center justify-center">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="glass-card rounded-3xl p-8 shadow-xl max-w-md w-full text-center"
         >
           <Lock className="w-12 h-12 text-primary mx-auto mb-6" />
-          <h1 className="text-3xl font-serif text-foreground mb-4">VIP Access</h1>
-          <p className="text-foreground/80 mb-8">Please enter your VIP access code to continue.</p>
-          
+          <h1 className="text-3xl font-serif text-foreground mb-4">
+            VIP Access
+          </h1>
+          <p className="text-foreground/80 mb-8">
+            Please enter your VIP invitation code to unlock priority reception seating.
+          </p>
+
           {verifyError && (
             <div className="bg-red-100 text-red-700 p-3 rounded-lg text-sm mb-6">
               {verifyError}
@@ -147,20 +190,20 @@ export default function VIPRegistration() {
           )}
 
           <form onSubmit={handleVerify} className="space-y-4">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={vipCode}
               onChange={(e) => setVipCode(e.target.value)}
               placeholder="Enter VIP Code"
               className="w-full bg-background border border-foreground/20 text-center text-xl tracking-widest uppercase rounded-lg px-4 py-4 focus:outline-none focus:border-primary"
               required
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isVerifying || !vipCode}
-              className="w-full bg-primary text-white font-medium py-4 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
+              className="w-full bg-primary text-white font-medium py-4 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
             >
-              {isVerifying ? "Verifying..." : "Unlock Access"}
+              {isVerifying ? "Verifying..." : "Unlock VIP Access"}
             </button>
           </form>
         </motion.div>
@@ -171,135 +214,183 @@ export default function VIPRegistration() {
   return (
     <div className="min-h-screen bg-background py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
           <Unlock className="w-10 h-10 text-primary mx-auto mb-4" />
-          <h1 className="text-4xl font-serif text-primary mb-2">Welcome, {vipLabel}</h1>
-          <p className="text-foreground/80">You have unlocked the VIP registration tier.</p>
+          <h1 className="text-4xl font-serif text-primary mb-2">
+            Welcome, {vipLabel}
+          </h1>
+          <p className="text-foreground/80">
+            You have unlocked the VIP Reception Seating tier in Ibadan.
+          </p>
         </motion.div>
 
         {/* Exclusive VIP Content Area */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
           className="bg-primary/10 border border-primary/20 rounded-2xl p-6 mb-12"
         >
-          <h3 className="font-serif text-xl text-primary mb-2">Exclusive VIP Note</h3>
+          <h3 className="font-serif text-xl text-primary mb-2">
+            Exclusive VIP Hospitality Note
+          </h3>
           <p className="text-foreground/80 text-sm leading-relaxed">
-            As one of our VIP guests, you are invited to a private pre-wedding family gathering on the 29th of December. A special access pass has also been reserved for your vehicle at all venues. Please ensure you register your plus-ones below so we can arrange your exclusive welcome package.
+            As one of our honoured VIP guests in Ibadan, priority table seating and reserved vehicle access have been arranged for you. Please complete your details below to receive your VIP Reception Seat Number.
           </p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="glass-card rounded-3xl p-8 shadow-xl border border-primary/20"
         >
           {errorMsg && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+            <div
+              className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6"
+              role="alert"
+            >
               <p>{errorMsg}</p>
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="vip-fullName" className="block text-sm font-medium text-foreground mb-2">
+                <label
+                  htmlFor="vip-fullName"
+                  className="block text-sm font-medium text-foreground mb-2"
+                >
                   Full Name *
                 </label>
-                <input 
+                <input
                   id="vip-fullName"
-                  {...register("fullName")} 
-                  className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+                  {...register("fullName")}
+                  className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground"
                 />
-                {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>}
+                {errors.fullName && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.fullName.message}
+                  </p>
+                )}
               </div>
               <div>
-                <label htmlFor="vip-phone" className="block text-sm font-medium text-foreground mb-2">
+                <label
+                  htmlFor="vip-phone"
+                  className="block text-sm font-medium text-foreground mb-2"
+                >
                   Phone Number *
                 </label>
-                <input 
+                <input
                   id="vip-phone"
                   type="tel"
-                  {...register("phone")} 
-                  className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+                  {...register("phone")}
+                  className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground"
                 />
-                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
+                {errors.phone && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.phone.message}
+                  </p>
+                )}
               </div>
             </div>
 
             <div>
-              <label htmlFor="vip-email" className="block text-sm font-medium text-foreground mb-2">
-                Email Address <span className="text-foreground/50 text-xs font-normal">(for VIP E-Ticket delivery)</span>
+              <label
+                htmlFor="vip-email"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
+                Email Address *{" "}
+                <span className="text-foreground/50 text-xs font-normal">
+                  (for VIP E-Ticket & Seat Number delivery)
+                </span>
               </label>
-              <input 
+              <input
                 id="vip-email"
-                type="email" 
-                {...register("email")} 
-                className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground" 
+                type="email"
+                {...register("email")}
+                className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground"
               />
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             <div>
               <span className="block text-sm font-medium text-foreground mb-3">
-                Events Attending *
+                Events Attending in Ibadan *
               </span>
               <div className="space-y-3">
                 {[
-                  { id: "vip-pre", label: "Private Pre-Wedding Gathering (VIP)" },
-                  { id: "vip-trad", label: "Traditional Wedding" },
-                  { id: "vip-church", label: "Church & Reception" }
+                  {
+                    id: "vip-trad",
+                    label: "Traditional Wedding (Dec 30 · Ibadan)",
+                  },
+                  {
+                    id: "vip-church",
+                    label: "Church & VIP Reception (Dec 31 · Ibadan)",
+                  },
                 ].map((evt) => (
-                  <label 
-                    key={evt.id} 
+                  <label
+                    key={evt.id}
                     htmlFor={evt.id}
                     className="flex items-center gap-3 p-3.5 rounded-xl border border-primary/20 bg-background/50 hover:bg-background cursor-pointer transition-colors"
                   >
-                    <input 
+                    <input
                       id={evt.id}
-                      type="checkbox" 
-                      value={evt.label} 
-                      {...register("eventsAttending")} 
-                      className="w-5 h-5 accent-primary text-primary focus:ring-primary rounded" 
+                      type="checkbox"
+                      value={evt.label}
+                      {...register("eventsAttending")}
+                      className="w-5 h-5 accent-primary text-primary focus:ring-primary rounded"
                     />
-                    <span className="text-foreground font-medium">{evt.label}</span>
+                    <span className="text-foreground font-medium">
+                      {evt.label}
+                    </span>
                   </label>
                 ))}
               </div>
-              {errors.eventsAttending && <p className="text-red-500 text-sm mt-1">{errors.eventsAttending.message}</p>}
+              {errors.eventsAttending && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.eventsAttending.message}
+                </p>
+              )}
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-foreground">VIP Plus Ones</label>
-                <button 
-                  type="button" 
-                  onClick={() => append({ name: "" })} 
-                  className="text-primary hover:text-primary/80 text-sm font-medium"
-                >
-                  + Add Guest
-                </button>
+                <label className="block text-sm font-medium text-foreground">
+                  VIP Accompanying Guests
+                </label>
+                {fields.length < 3 && (
+                  <button
+                    type="button"
+                    onClick={() => append({ name: "" })}
+                    className="text-primary hover:text-primary/80 text-sm font-medium cursor-pointer"
+                  >
+                    + Add Guest
+                  </button>
+                )}
               </div>
               <div className="space-y-3">
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex gap-3">
-                    <input 
+                    <input
                       id={`vipPlusOne-${index}`}
                       aria-label={`VIP Plus One ${index + 1} Full Name`}
-                      {...register(`plusOnes.${index}.name`)} 
-                      placeholder="Guest Full Name" 
-                      className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-2 focus:outline-none focus:border-primary text-foreground" 
+                      {...register(`plusOnes.${index}.name`)}
+                      placeholder="Guest Full Name"
+                      className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-2 focus:outline-none focus:border-primary text-foreground"
                     />
-                    <button 
-                      type="button" 
-                      onClick={() => remove(index)} 
-                      className="text-red-500 text-sm font-medium px-2"
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="text-red-500 text-sm font-medium px-2 cursor-pointer"
                     >
                       Remove
                     </button>
@@ -309,23 +400,28 @@ export default function VIPRegistration() {
             </div>
 
             <div>
-              <label htmlFor="vip-dietaryNote" className="block text-sm font-medium text-foreground mb-2">
+              <label
+                htmlFor="vip-dietaryNote"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
                 Dietary Requirements / VIP Preferences
               </label>
-              <textarea 
+              <textarea
                 id="vip-dietaryNote"
-                {...register("dietaryNote")} 
-                rows={3} 
-                className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground resize-none" 
+                {...register("dietaryNote")}
+                rows={3}
+                className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary text-foreground resize-none"
               />
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isSubmitting}
               className="w-full bg-primary text-white font-medium text-lg py-4 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer shadow-lg"
             >
-              {isSubmitting ? "Processing VIP Registration..." : "Complete VIP Registration"}
+              {isSubmitting
+                ? "Allocating VIP Reception Seat..."
+                : "Complete VIP Registration"}
             </button>
           </form>
         </motion.div>

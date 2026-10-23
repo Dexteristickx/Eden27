@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { getSupabaseAdmin } from '@/lib/supabase';
+import {
+  searchGuestInStore,
+  checkInGuestInStore,
+  triggerGoogleSheetWebhook,
+} from '@/lib/guest-store';
 
 async function isAuthorized() {
   const cookieStore = await cookies();
@@ -19,36 +23,24 @@ export async function GET(request: Request) {
     const rawQuery = (searchParams.get('q') || '').trim();
 
     if (!rawQuery) {
-      return NextResponse.json({ error: 'Search query is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Search query is required' },
+        { status: 400 }
+      );
     }
 
-    const supabaseAdmin = getSupabaseAdmin();
-
-    // Try SECURITY DEFINER RPC first if available, else direct query
-    const { data: rpcGuest, error: rpcError } = await supabaseAdmin.rpc(
-      'admin_search_guest',
-      { p_query: rawQuery }
-    );
-
-    if (!rpcError && rpcGuest) {
-      return NextResponse.json({ guest: rpcGuest });
-    }
-
-    const { data, error } = await supabaseAdmin
-      .from('guests')
-      .select('*')
-      .or(`seat_number.ilike.${rawQuery},full_name.ilike.%${rawQuery}%`)
-      .limit(1)
-      .maybeSingle();
-
-    if (error || !data) {
+    const guest = searchGuestInStore(rawQuery);
+    if (!guest) {
       return NextResponse.json({ error: 'Guest not found.' }, { status: 404 });
     }
 
-    return NextResponse.json({ guest: data });
+    return NextResponse.json({ guest });
   } catch (error: any) {
     console.error('Check-in search error:', error);
-    return NextResponse.json({ error: 'Failed to search guest.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to search guest.' },
+      { status: 500 }
+    );
   }
 }
 
@@ -60,32 +52,32 @@ export async function POST(request: Request) {
 
     const { guestId } = await request.json();
     if (!guestId) {
-      return NextResponse.json({ error: 'Guest ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Guest ID is required' },
+        { status: 400 }
+      );
     }
 
-    const supabaseAdmin = getSupabaseAdmin();
+    const updated = checkInGuestInStore(guestId);
+    if (!updated) {
+      return NextResponse.json({ error: 'Guest not found.' }, { status: 404 });
+    }
 
-    // Try SECURITY DEFINER RPC first if available, else direct update
-    const { error: rpcError } = await supabaseAdmin.rpc('admin_checkin_guest', {
-      p_guest_id: guestId,
+    // Notify Google Sheet that guest has checked in at the reception door
+    await triggerGoogleSheetWebhook({
+      action: 'checkin',
+      id: updated.id,
+      seatNumber: updated.seat_number,
+      fullName: updated.full_name,
+      checkedInAt: updated.checked_in_at,
     });
 
-    if (!rpcError) {
-      return NextResponse.json({ success: true });
-    }
-
-    const { error } = await supabaseAdmin
-      .from('guests')
-      .update({ checked_in: true })
-      .eq('id', guestId);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, guest: updated });
   } catch (error: any) {
     console.error('Check-in update error:', error);
-    return NextResponse.json({ error: 'Failed to check in guest.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to check in guest.' },
+      { status: 500 }
+    );
   }
 }

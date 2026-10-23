@@ -14,10 +14,10 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL("https://eden27.com"),
   title: `${siteConfig.coupleNames} · EDEN27 Wedding`,
-  description: `You are warmly invited to celebrate the wedding of ${siteConfig.coupleNames} on December 30–31, 2026 in ${siteConfig.weddingLocation}. RSVP and view event details.`,
+  description: `You are warmly invited to celebrate the wedding of ${siteConfig.coupleNames} on December 30–31, 2026 in ${siteConfig.weddingLocation}. RSVP to receive your allocated reception seat number.`,
   openGraph: {
     title: `${siteConfig.coupleNames} · EDEN27 Wedding`,
-    description: `Join us in Lagos on December 30–31, 2026 as we celebrate the union of ${siteConfig.coupleNames}.`,
+    description: `Join us in Ibadan on December 30–31, 2026 as we celebrate the union of ${siteConfig.coupleNames}. RSVP for your reception seat pass.`,
     url: "https://eden27.com",
     siteName: "EDEN27 Wedding",
     images: [
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.coupleNames} · EDEN27 Wedding`,
-    description: `Celebrate with ${siteConfig.coupleNames} on December 30–31, 2026 in Lagos, Nigeria.`,
+    description: `Celebrate with ${siteConfig.coupleNames} on December 30–31, 2026 in Ibadan, Nigeria.`,
     images: ["/images/proposal/couple-portrait-1.webp"],
   },
 };

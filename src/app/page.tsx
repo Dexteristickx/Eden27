@@ -246,7 +246,7 @@ export default function Home() {
           <CountdownTimer
             targetDate="2026-12-30T13:00:00+01:00"
             label="Traditional Wedding"
-            sublabel="December 30, 2026 · 1:00 PM · Lagos"
+            sublabel="December 30, 2026 · 1:00 PM · Ibadan"
             accentColor="#c48b71"
           />
 
@@ -260,7 +260,7 @@ export default function Home() {
           <CountdownTimer
             targetDate="2026-12-31T10:00:00+01:00"
             label="Church Wedding & Reception"
-            sublabel="December 31, 2026 · 10:00 AM · Lagos"
+            sublabel="December 31, 2026 · 10:00 AM · Ibadan"
             accentColor="#2c241b"
           />
         </div>
