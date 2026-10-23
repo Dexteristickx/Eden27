@@ -80,6 +80,17 @@ export default function Register() {
               <Image src={successData.qrCode} alt="E-Ticket QR Code" width={200} height={200} className="rounded-lg shadow-sm" />
             </div>
           )}
+          {successData.qrCode && (
+            <div className="mt-4 flex justify-center">
+              <a
+                href={successData.qrCode}
+                download={`EDEN27-Ticket-${successData.seatNumber}.png`}
+                className="inline-flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-primary/90 transition-colors shadow-md"
+              >
+                Download E-Ticket QR
+              </a>
+            </div>
+          )}
           <p className="text-sm text-foreground/60 mt-4">Save this QR code to show at the entrance.</p>
         </motion.div>
       </div>

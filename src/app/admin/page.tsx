@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
 import { Users, CheckCircle, Ticket, Download, Settings, LogOut, QrCode } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -28,26 +27,24 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('guests')
-        .select('*')
-        .order('registered_at', { ascending: false });
-        
-      if (error) {
-        console.error("Error fetching guests:", error);
+      const res = await fetch("/api/admin/guests");
+      if (!res.ok) {
+        console.error("Error fetching guests:", await res.text());
         return;
       }
 
-      setGuests(data || []);
+      const { guests: data } = await res.json();
+      const guestList = data || [];
+      setGuests(guestList);
       
-      const total = data?.length || 0;
-      const vip = data?.filter(g => g.guest_type === 'vip').length || 0;
-      const checked = data?.filter(g => g.checked_in).length || 0;
+      const total = guestList.length;
+      const vip = guestList.filter((g: any) => g.guest_type === "vip").length;
+      const checked = guestList.filter((g: any) => g.checked_in).length;
       
       setStats({
         totalRegistered: total,
         vipRegistered: vip,
-        checkedIn: checked
+        checkedIn: checked,
       });
     } catch (err) {
       console.error(err);

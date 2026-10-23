@@ -7,8 +7,8 @@ import AddToCalendar from "@/components/AddToCalendar";
 
 const eventTimeMap: Record<string, { startISO: string; endISO: string; description: string }> = {
   traditional: {
-    startISO: "2026-12-30T10:00:00+01:00",
-    endISO: "2026-12-30T15:00:00+01:00",
+    startISO: "2026-12-30T13:00:00+01:00",
+    endISO: "2026-12-30T18:00:00+01:00",
     description: "Traditional engagement ceremony. Aso-Ebi attire. #Eden27",
   },
   church: {

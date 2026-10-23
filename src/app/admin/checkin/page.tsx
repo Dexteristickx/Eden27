@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { Search, QrCode, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
+import { Search, QrCode, CheckCircle, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function CheckIn() {
@@ -19,18 +18,28 @@ export default function CheckIn() {
     setIsProcessing(true);
 
     try {
-      const { data, error } = await supabase
-        .from('guests')
-        .select('*')
-        .or(`seat_number.eq.${searchQuery},full_name.ilike.%${searchQuery}%`)
-        .limit(1)
-        .single();
-
-      if (error || !data) {
-        throw new Error("Guest not found.");
+      // Allow pasting raw QR JSON payload or entering Seat No / Name
+      let queryToSearch = searchQuery.trim();
+      if (queryToSearch.startsWith("{")) {
+        try {
+          const parsed = JSON.parse(queryToSearch);
+          if (parsed.seat) queryToSearch = parsed.seat;
+          else if (parsed.name) queryToSearch = parsed.name;
+        } catch {
+          // Use raw string
+        }
       }
 
-      setSearchResult(data);
+      const res = await fetch(
+        `/api/admin/checkin?q=${encodeURIComponent(queryToSearch)}`
+      );
+      const data = await res.json();
+
+      if (!res.ok || !data.guest) {
+        throw new Error(data.error || "Guest not found.");
+      }
+
+      setSearchResult(data.guest);
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
@@ -41,15 +50,20 @@ export default function CheckIn() {
   const handleCheckIn = async () => {
     if (!searchResult) return;
     setIsProcessing(true);
-    
-    try {
-      const { error } = await supabase
-        .from('guests')
-        .update({ checked_in: true })
-        .eq('id', searchResult.id);
+    setErrorMsg("");
 
-      if (error) throw error;
-      
+    try {
+      const res = await fetch("/api/admin/checkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guestId: searchResult.id }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to check in guest.");
+      }
+
       setSearchResult({ ...searchResult, checked_in: true });
     } catch (err: any) {
       setErrorMsg(err.message);
@@ -82,7 +96,7 @@ export default function CheckIn() {
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Seat No. (e.g. A-001) or Name"
+              placeholder="Seat No. (e.g. A-001), Name, or scanned QR data"
               className="w-full bg-background border border-foreground/20 rounded-lg px-4 py-3 focus:outline-none focus:border-primary"
             />
             <button 

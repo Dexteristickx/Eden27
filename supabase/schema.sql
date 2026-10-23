@@ -105,10 +105,30 @@ begin
 
   return jsonb_build_object(
     'id', v_guest_id,
-    'seat_number', v_seat_number
+    'seat_number', v_seat_number,
+    'guest_type', p_guest_type
   );
 end;
 $$ language plpgsql security definer;
+
+-- Admin RPCs (invoked only from PIN-authenticated Next.js server routes)
+create or replace function admin_list_guests()
+returns setof guests as $$
+  select * from guests order by registered_at desc;
+$$ language sql security definer;
+
+create or replace function admin_search_guest(p_query text)
+returns guests as $$
+  select * from guests
+  where seat_number ilike p_query
+     or full_name ilike ('%' || p_query || '%')
+  limit 1;
+$$ language sql security definer;
+
+create or replace function admin_checkin_guest(p_guest_id uuid)
+returns void as $$
+  update guests set checked_in = true where id = p_guest_id;
+$$ language sql security definer;
 
 -- -------------------------------------------------------------
 -- ROW LEVEL SECURITY (RLS) POLICIES
@@ -149,4 +169,3 @@ create policy "Allow public read on event_settings" on event_settings
 
 create policy "Block anon mutation on event_settings" on event_settings
   for insert with check (false);
-
