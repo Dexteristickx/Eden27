@@ -22,9 +22,9 @@ export const metadata: Metadata = {
     siteName: "EDEN27 Wedding",
     images: [
       {
-        url: "/images/hero-1.png",
-        width: 1200,
-        height: 630,
+        url: "/images/proposal/couple-portrait-1.webp",
+        width: 667,
+        height: 1000,
         alt: `${siteConfig.coupleNames} — EDEN27`,
       },
     ],
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${siteConfig.coupleNames} · EDEN27 Wedding`,
     description: `Celebrate with ${siteConfig.coupleNames} on December 30–31, 2026 in Lagos, Nigeria.`,
-    images: ["/images/hero-1.png"],
+    images: ["/images/proposal/couple-portrait-1.webp"],
   },
 };
 

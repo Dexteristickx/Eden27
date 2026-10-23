@@ -43,7 +43,11 @@ A modern, luxury, mobile-responsive wedding invitation and event website for Olu
   - Synced event schedule times across `site-config.ts`, `page.tsx`, and `schedule/page.tsx`
   - Added one-click "Download E-Ticket QR" button on `/register` and `/vip` confirmation screens
   - Added OpenGraph & Twitter card metadata (`metadataBase: https://eden27.com`) in `src/app/layout.tsx`
-- [/] Deploy Phase 3 updates to GitHub (`Dexteristickx/Eden27`) and rebuild on production VPS (`/var/www/eden27.com`)
+- [x] Deployed Phase 3 updates to GitHub (`Dexteristickx/Eden27`) and rebuilt on production VPS (`/var/www/eden27.com`) under PM2 (`eden27`)
+- [x] Phase 4 Proposal Media Curation & Editorial Cinema Integration:
+  - Curated 14 couple-only & proposal-detail portraits from the 99 raw photos (excluding crowd/group shots) and converted to WebP (`public/images/proposal/`)
+  - Trimmed & transcoded the 140.84 MB `.MOV` proposal video into a 79s upright couple-only highlight film (`public/videos/proposal-film.mp4`) and 16s silent loop (`public/videos/proposal-teaser.mp4`)
+  - Built the Proposal Cinema Showcase + alternating photo chapters on `/story`, categorized masonry gallery + film modal on `/gallery`, and Proposal Showcase section on `/`
 
 ## Key Files & Recent Modifications
 - `src/app/api/admin/guests/route.ts`: Protected server-side endpoint for Admin guest listing
